@@ -7,8 +7,8 @@ import (
 
 	"github.com/ngrok/sqlmw"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/label"
 )
 
 const (
@@ -44,7 +44,7 @@ func (in *sqlInterceptor) ConnBeginTx(ctx context.Context, conn driver.ConnBegin
 }
 
 func (in *sqlInterceptor) ConnPrepareContext(ctx context.Context, conn driver.ConnPrepareContext, query string) (driver.Stmt, error) {
-	traceAttributes := append(in.traceAttributes, kv.String("sql.query", query))
+	traceAttributes := append(in.traceAttributes, label.String("sql.query", query))
 	ctx, span := in.tr.Start(ctx, "ConnPrepareContext", trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(traceAttributes...))
 	defer span.End()
@@ -59,7 +59,7 @@ func (in *sqlInterceptor) ConnPing(ctx context.Context, conn driver.Pinger) erro
 }
 
 func (in *sqlInterceptor) ConnExecContext(ctx context.Context, conn driver.ExecerContext, query string, args []driver.NamedValue) (driver.Result, error) {
-	traceAttributes := append(in.traceAttributes, kv.String("sql.query", query))
+	traceAttributes := append(in.traceAttributes, label.String("sql.query", query))
 	ctx, span := in.tr.Start(ctx, "ConnExecContext", trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(traceAttributes...))
 	defer span.End()
@@ -67,7 +67,7 @@ func (in *sqlInterceptor) ConnExecContext(ctx context.Context, conn driver.Exece
 }
 
 func (in *sqlInterceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (driver.Rows, error) {
-	traceAttributes := append(in.traceAttributes, kv.String("sql.query", query))
+	traceAttributes := append(in.traceAttributes, label.String("sql.query", query))
 	ctx, span := in.tr.Start(ctx, "ConnQueryContext", trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(traceAttributes...))
 	defer span.End()

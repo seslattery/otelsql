@@ -1,11 +1,11 @@
 package otelsql
 
 import (
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/label"
 )
 
-type traceAttributes []kv.KeyValue
+type traceAttributes []label.KeyValue
 
 // Config is used to configure the go-restful middleware.
 type config struct {
@@ -24,7 +24,7 @@ func WithTraceProvider(traceProvider trace.Provider) Option {
 }
 
 // WithTracer configures the interceptor to attach the default KeyValues.
-func WithTraceAttributes(traceAttributes []kv.KeyValue) Option {
+func WithTraceAttributes(traceAttributes []label.KeyValue) Option {
 	return func(cfg *config) {
 		cfg.traceAttributes = traceAttributes
 	}
