@@ -7,15 +7,29 @@ import (
 	"runtime"
 
 	"github.com/ngrok/sqlmw"
+	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
 )
 
-func Register(drivername string, dri driver.Driver, tr trace.Tracer, defaultTraceAttributes ...kv.KeyValue) {
-	sql.Register(drivername, sqlmw.Driver(dri, &sqlInterceptor{tr: tr, traceAttributes: defaultTraceAttributes}))
-}
+const (
+	defaultTracerName = "go.opentelemetry.io/contrib/instrumentation/github.com/seslattery/otelsql"
+)
 
-type traceAttributes []kv.KeyValue
+func Register(drivername string, dri driver.Driver, opts ...Option) {
+	cfg := config{}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+	if cfg.traceProvider == nil {
+		cfg.traceProvider = global.TraceProvider()
+	}
+	sqlInt := &sqlInterceptor{
+		tr:              cfg.traceProvider.Tracer(defaultTracerName),
+		traceAttributes: cfg.traceAttributes,
+	}
+	sql.Register(drivername, sqlmw.Driver(dri, sqlInt))
+}
 
 type sqlInterceptor struct {
 	sqlmw.NullInterceptor
