@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	defaultTracerName = "go.opentelemetry.io/contrib/instrumentation/github.com/seslattery/otelsql"
+	defaultTracerName = "go.opentelemetry.io/contrib/instrumentation/database/sql"
 )
 
 func Register(drivername string, dri driver.Driver, opts ...Option) {
